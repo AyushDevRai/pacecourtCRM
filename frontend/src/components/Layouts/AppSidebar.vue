@@ -8,7 +8,7 @@
        column falls through to the white page canvas. The token cannot be
        overridden on the Sidebar element itself — `bg-surface-sidebar` is emitted
        after `bg-surface-gray-1` in the utilities layer and would win. -->
-  <div class="relative flex h-full bg-surface-gray-1">
+  <div class="relative flex h-full bg-surface-base">
     <Sidebar
       v-model:collapsed="isSidebarCollapsed"
       :collapsible="!mobile"
@@ -101,7 +101,32 @@
           </CollapsibleSection>
         </div>
 
-        <div v-if="!mobile" class="mt-auto flex flex-col gap-1 pt-2">
+        <div v-if="!mobile" class="mt-auto flex flex-col gap-1.5 pt-2 border-t border-[var(--pc-border)]">
+          <!-- User Profile Pill Card (Pacecourt Design System) -->
+          <div
+            v-if="!isCollapsed"
+            class="flex items-center gap-2.5 p-2 rounded-2xl bg-[var(--pc-surface-2)] border border-[var(--pc-border)]"
+          >
+            <div class="size-8 rounded-full bg-[var(--pc-avatar-bg)] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+              {{ (currentUser.full_name || user || 'A').charAt(0).toUpperCase() }}
+            </div>
+            <div class="flex flex-1 flex-col text-left truncate leading-tight">
+              <div class="text-xs font-bold text-[var(--pc-navy)] truncate">
+                {{ currentUser.full_name || user || 'Admin' }}
+              </div>
+              <div class="text-[10px] text-[var(--pc-muted)] truncate">
+                {{ currentUser.role || 'Administrator' }}
+              </div>
+            </div>
+            <button
+              :title="__('Settings')"
+              class="p-1 rounded-full text-[var(--pc-muted)] hover:text-[var(--pc-navy)] hover:bg-[var(--pc-surface-subtle)] transition"
+              @click="showSettings = true"
+            >
+              <span class="lucide-settings size-3.5" aria-hidden="true" />
+            </button>
+          </div>
+
           <SidebarItem
             v-if="isManager() && isDemoDataCreated"
             :label="__('Clear Demo Data')"
@@ -151,9 +176,11 @@ import WebsiteIcon from '@/components/Icons/WebsiteIcon.vue'
 import { getNavigationItems } from '@/utils/navigation'
 import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
 import DealsIcon from '@/components/Icons/DealsIcon.vue'
+import FileTextIcon from '@/components/Icons/FileTextIcon.vue'
 import LeadsIcon from '@/components/Icons/LeadsIcon.vue'
 import NoteIcon from '@/components/Icons/NoteIcon.vue'
 import OrganizationsIcon from '@/components/Icons/OrganizationsIcon.vue'
+import DealersIcon from '@/components/Icons/DealersIcon.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import TaskIcon from '@/components/Icons/TaskIcon.vue'
 import CollapseSidebar from '@/components/Icons/CollapseSidebar.vue'
@@ -271,10 +298,14 @@ function getIcon(routeName, icon) {
       return LeadsIcon
     case 'Deals':
       return DealsIcon
+    case 'Quotations':
+      return FileTextIcon
     case 'Contacts':
       return ContactsIcon
     case 'Organizations':
       return OrganizationsIcon
+    case 'Dealers':
+      return DealersIcon
     case 'Notes':
       return NoteIcon
     case 'Call Logs':
@@ -333,7 +364,8 @@ function toggleHelpModal() {
 
 // onboarding
 const { user } = sessionStore()
-const { users, isManager } = usersStore()
+const { users, isManager, getUser } = usersStore()
+const currentUser = computed(() => (getUser ? getUser(user) : {}) || {})
 const { isOnboardingStepsCompleted, setUp } = useOnboarding('frappecrm')
 
 // The onboarding composable persists the checklist as a positional

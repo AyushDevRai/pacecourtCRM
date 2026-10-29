@@ -314,7 +314,7 @@ import { useDocument } from '@/data/document'
 import { isMobileView } from '@/composables/settings'
 import { whatsappEnabled } from '@/composables/whatsapp'
 import { callEnabled } from '@/composables/telephony'
-import { canViewQuotations } from '@/composables/erpnext'
+import { canViewQuotations } from '@/composables/quotations'
 import { useActiveTabManager } from '@/composables/useActiveTabManager'
 import { useVisitedRecords } from '@/composables/useVisitedRecords'
 import {

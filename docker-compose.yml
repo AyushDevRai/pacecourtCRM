@@ -1,0 +1,44 @@
+version: "3.7"
+name: pacecourt
+services:
+  mariadb:
+    image: mariadb:10.8
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --skip-innodb-read-only-compressed
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+    volumes:
+      - mariadb-data:/var/lib/mysql
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+
+  frappe:
+    image: frappe/bench:latest
+    restart: unless-stopped
+    command: bash /workspace/init.sh
+    environment:
+      - SHELL=/bin/bash
+    working_dir: /home/frappe
+    volumes:
+      - bench-data:/home/frappe
+      - .:/workspace
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pacecourt.rule=Host(`srv1484793.hstgr.cloud`)"
+      - "traefik.http.routers.pacecourt.entrypoints=websecure"
+      - "traefik.http.routers.pacecourt.tls=true"
+      - "traefik.http.routers.pacecourt.tls.certresolver=letsencrypt"
+      - "traefik.http.services.pacecourt.loadbalancer.server.port=8000"
+
+volumes:
+  mariadb-data:
+  bench-data:

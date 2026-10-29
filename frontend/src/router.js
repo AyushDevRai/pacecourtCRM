@@ -51,6 +51,18 @@ const routes = [
     props: true,
   },
   {
+    alias: '/quotations',
+    path: '/quotations/view/:viewType?',
+    name: 'Quotations',
+    component: () => import('@/pages/Quotations.vue'),
+  },
+  {
+    path: '/quotations/:quotationId',
+    name: 'Quotation',
+    component: () => import('@/pages/Quotation.vue'),
+    props: true,
+  },
+  {
     alias: '/notes',
     path: '/notes/view/:viewType?',
     name: 'Notes',
@@ -85,6 +97,12 @@ const routes = [
     name: 'Organization',
     component: () => import(`@/pages/${handleMobileView('Organization')}.vue`),
     props: true,
+  },
+  {
+    alias: '/dealers',
+    path: '/dealers/view/:viewType?',
+    name: 'Dealers',
+    component: () => import('@/pages/Dealers.vue'),
   },
   {
     alias: '/call-logs',
@@ -226,8 +244,10 @@ router.beforeEach(async (to, from, next) => {
     [
       'Leads',
       'Deals',
+      'Quotations',
       'Contacts',
       'Organizations',
+      'Dealers',
       'Notes',
       'Tasks',
       'Call Logs',
@@ -244,8 +264,10 @@ router.beforeEach(async (to, from, next) => {
       const doctypeMap = {
         Leads: 'CRM Lead',
         Deals: 'CRM Deal',
+        Quotations: 'CRM Quotation',
         Contacts: 'Contact',
         Organizations: 'CRM Organization',
+        Dealers: 'CRM Dealer',
         Notes: 'FCRM Note',
         Tasks: 'CRM Task',
         'Call Logs': 'CRM Call Log',

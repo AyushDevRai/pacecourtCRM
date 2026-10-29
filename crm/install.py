@@ -178,6 +178,10 @@ def add_default_fields_layout(force=False):
 			"doctype": "CRM Organization",
 			"layout": '[{"name": "organization_section", "columns": [{"name": "column_zOuv", "fields": ["organization_name"]}]}, {"name": "website_revenue_section", "hideBorder": true, "columns": [{"name": "column_I5Dy", "fields": ["website", "company_description"]}, {"name": "column_Rgss", "fields": ["annual_revenue"]}]}, {"name": "territory_section", "hideBorder": true, "columns": [{"name": "column_w6ap", "fields": ["territory"]}]}, {"name": "employee_industry_section", "hideBorder": true, "columns": [{"name": "column_u5tZ", "fields": ["no_of_employees", "linkedin", "twitter"]}, {"name": "column_FFrT", "fields": ["industry", "facebook"]}]}, {"name": "address_section", "hideBorder": true, "columns": [{"name": "column_O2dk", "fields": ["address"]}]}]',
 		},
+		"CRM Dealer-Quick Entry": {
+			"doctype": "CRM Dealer",
+			"layout": '[{"name": "basic_section", "columns": [{"name": "col_1", "fields": ["dealer_name", "contact_person"]}, {"name": "col_2", "fields": ["mobile_no", "email"]}]}, {"name": "location_section", "hideBorder": true, "columns": [{"name": "col_3", "fields": ["territory", "city", "state"]}, {"name": "col_4", "fields": ["tier", "status", "address"]}]}, {"name": "notes_section", "hideBorder": true, "columns": [{"name": "col_5", "fields": ["sports_specialization", "notes"]}]}]',
+		},
 		"Address-Quick Entry": {
 			"doctype": "Address",
 			"layout": '[{"name": "details_section", "columns": [{"name": "column_uSSG", "fields": ["address_title", "address_type", "address_line1", "address_line2"]}]}, {"name": "location_section", "hideBorder": true, "columns": [{"name": "column_TCoZ", "fields": ["country", "city"]}, {"name": "column_PqrK", "fields": ["state", "pincode"]}]}]',
@@ -199,11 +203,11 @@ def add_default_fields_layout(force=False):
 	sidebar_fields_layouts = {
 		"CRM Lead-Side Panel": {
 			"doctype": "CRM Lead",
-			"layout": '[{"label": "Details", "name": "details_section", "opened": true, "columns": [{"name": "column_kl92", "fields": ["organization", "company_description", "website", "territory", "industry", "no_of_employees", "job_title", "source", "lead_owner", "linkedin", "twitter", "facebook"]}]}, {"label": "Person", "name": "person_section", "opened": true, "columns": [{"name": "column_XmW2", "fields": ["salutation", "first_name", "last_name", "email", "mobile_no"]}]}]',
+			"layout": '[{"label": "Details", "name": "details_section", "opened": true, "columns": [{"name": "column_kl92", "fields": ["organization", "company_description", "website", "territory", "industry", "no_of_employees", "job_title", "source", "lead_owner", "linkedin", "twitter", "facebook"]}]}, {"label": "Person", "name": "person_section", "opened": true, "columns": [{"name": "column_XmW2", "fields": ["salutation", "first_name", "last_name", "email", "mobile_no"]}]}, {"label": "Dealer Handover", "name": "dealer_handover_section", "opened": true, "columns": [{"name": "column_dealer", "fields": ["dealer", "dealer_assigned_date", "dealer_feedback_status", "dealer_notes"]}]}]',
 		},
 		"CRM Deal-Side Panel": {
 			"doctype": "CRM Deal",
-			"layout": '[{"label": "Contacts", "name": "contacts_section", "opened": true, "editable": false, "contacts": []}, {"label": "Organization Details", "name": "organization_section", "opened": true, "columns": [{"name": "column_na2Q", "fields": ["organization", "company_description", "industry", "no_of_employees", "website", "territory", "annual_revenue", "closed_date", "probability", "next_step", "deal_owner", "linkedin", "twitter", "facebook"]}]}]',
+			"layout": '[{"label": "Contacts", "name": "contacts_section", "opened": true, "editable": false, "contacts": []}, {"label": "Organization Details", "name": "organization_section", "opened": true, "columns": [{"name": "column_na2Q", "fields": ["organization", "company_description", "industry", "no_of_employees", "website", "territory", "annual_revenue", "closed_date", "probability", "next_step", "deal_owner", "linkedin", "twitter", "facebook"]}]}, {"label": "Dealer Handover", "name": "dealer_handover_section", "opened": true, "columns": [{"name": "column_dealer_deal", "fields": ["dealer", "dealer_assigned_date", "dealer_feedback_status", "dealer_notes"]}]}]',
 		},
 		"Contact-Side Panel": {
 			"doctype": "Contact",

@@ -1,5 +1,10 @@
 <template>
   <FrappeUIProvider>
+    <div
+      v-if="isNavigating"
+      class="top-loader-bar"
+      aria-hidden="true"
+    />
     <NotPermitted v-if="$route.name === 'Not Permitted'" />
     <router-view v-else-if="$route.name === 'Onboarding'" />
     <Layout v-else-if="session.isLoggedIn" class="isolate">
@@ -16,10 +21,26 @@ import DoctypeModals from '@/components/Modals/DoctypeModals.vue'
 import { Dialogs } from '@/utils/dialogs'
 import { sessionStore } from '@/stores/session'
 import { FrappeUIProvider, setConfig, useColorScheme } from 'frappe-ui'
-import { computed, defineAsyncComponent, provide } from 'vue'
+import { computed, defineAsyncComponent, provide, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const session = sessionStore()
 provide('session', session)
+
+const router = useRouter()
+const isNavigating = ref(false)
+
+if (router) {
+  router.beforeEach((to, from, next) => {
+    isNavigating.value = true
+    next()
+  })
+  router.afterEach(() => {
+    setTimeout(() => {
+      isNavigating.value = false
+    }, 250)
+  })
+}
 
 const { setColorScheme } = useColorScheme()
 if (!localStorage.getItem('theme')) {

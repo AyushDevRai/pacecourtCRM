@@ -81,7 +81,14 @@
   "status_change_log",
   "lost_details_tab",
   "lost_reason",
-  "lost_notes"
+  "lost_notes",
+  "dealer_section",
+  "dealer",
+  "dealer_assigned_date",
+  "dealer_assigned_by",
+  "column_break_dealer",
+  "dealer_feedback_status",
+  "dealer_notes"
  ],
  "fields": [
   {
@@ -515,6 +522,48 @@
    "fieldtype": "Data",
    "label": "Facebook",
    "no_copy": 1
+  },
+  {
+   "fieldname": "dealer_section",
+   "fieldtype": "Section Break",
+   "label": "Dealer Assignment"
+  },
+  {
+   "fieldname": "dealer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Assigned Dealer",
+   "options": "CRM Dealer"
+  },
+  {
+   "fieldname": "dealer_assigned_date",
+   "fieldtype": "Datetime",
+   "label": "Dealer Assigned Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dealer_assigned_by",
+   "fieldtype": "Link",
+   "label": "Dealer Assigned By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_dealer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Pending Contact",
+   "fieldname": "dealer_feedback_status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Dealer Feedback Status",
+   "options": "\nPending Contact\nSite Visit Scheduled\nSite Visit Completed\nQuotation Sent by Dealer\nMaterial Ordered\nDropped / Lost"
+  },
+  {
+   "fieldname": "dealer_notes",
+   "fieldtype": "Small Text",
+   "label": "Dealer Notes"
   }
  ],
  "grid_page_length": 50,

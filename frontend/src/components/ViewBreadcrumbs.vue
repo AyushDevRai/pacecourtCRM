@@ -1,19 +1,15 @@
 <template>
-  <div class="flex items-center">
+  <div class="flex items-center gap-1">
     <router-link
       :to="{ name: routeName }"
-      class="px-0.5 py-1 text-lg-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
-      :class="[
-        viewControls && viewControls.viewsDropdownOptions
-          ? 'text-ink-gray-5 hover:text-ink-gray-7'
-          : 'text-ink-gray-7',
-      ]"
+      class="px-1 py-1 font-extrabold text-xl text-[var(--pc-navy)] tracking-tight flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3 hover:opacity-90"
     >
-      {{ __(routeName) }}
+      <span>{{ __(routeName) }}</span>
+      <span class="inline-block size-2 rounded-full bg-[var(--pc-lime)] shrink-0" aria-hidden="true" />
     </router-link>
     <span
       v-if="viewControls && viewControls.viewsDropdownOptions"
-      class="mx-0.5 text-base text-ink-gray-4"
+      class="mx-1 text-sm text-[var(--pc-muted)]"
       aria-hidden="true"
     >
       /
@@ -25,12 +21,12 @@
       <template #default="{ open }">
         <Button
           variant="ghost"
-          class="text-lg-medium text-nowrap"
+          class="font-bold text-base text-[var(--pc-navy)] text-nowrap rounded-full hover:bg-[var(--pc-surface-2)]"
           :label="__(viewControls.currentView?.label)"
           :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
         >
           <template #prefix>
-            <Icon :icon="viewControls.currentView?.icon" class="h-4" />
+            <Icon :icon="viewControls.currentView?.icon" class="h-4 text-[var(--pc-muted)]" />
           </template>
         </Button>
       </template>

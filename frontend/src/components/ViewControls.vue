@@ -142,7 +142,7 @@
       <Button icon="lucide-x" @click="customizeQuickFilter = false" />
     </div>
   </div>
-  <div v-else class="flex items-center justify-between gap-2 px-5 py-4">
+  <div v-else class="flex items-center justify-between gap-2 px-5 py-3.5 border-b border-[var(--pc-border)] bg-[var(--pc-surface)]">
     <FadedScrollableDiv
       class="flex flex-1 items-center overflow-x-auto -ml-1 h-9"
       orientation="horizontal"

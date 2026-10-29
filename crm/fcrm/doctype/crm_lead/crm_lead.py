@@ -101,6 +101,19 @@ class CRMLead(Document):
 			self.assign_agent(self.lead_owner)
 		if self.has_value_changed("status"):
 			add_status_change_log(self)
+		self.validate_dealer_assignment()
+
+	def validate_dealer_assignment(self):
+		if self.dealer:
+			if self.is_new() or self.has_value_changed("dealer"):
+				self.dealer_assigned_date = frappe.utils.now_datetime()
+				self.dealer_assigned_by = frappe.session.user
+				if not self.dealer_feedback_status:
+					self.dealer_feedback_status = "Pending Contact"
+		elif not self.is_new() and self.has_value_changed("dealer") and not self.dealer:
+			self.dealer_assigned_date = None
+			self.dealer_assigned_by = None
+			self.dealer_feedback_status = None
 
 	def after_insert(self):
 		if self.lead_owner:

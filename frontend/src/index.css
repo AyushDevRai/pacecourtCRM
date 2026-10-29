@@ -1,5 +1,469 @@
 @import 'frappe-ui/style.css';
 
+/* ==========================================================================
+   Pacecourt Design System - Tokens & Root Variables
+   Extracted from Organisational Dashboard Design Language & Screens
+   ========================================================================== */
+:root {
+  /* Brand Core Tokens */
+  --pc-navy: #0f2a45;
+  --pc-navy-deep: #0b1f33;
+  --pc-avatar-bg: #0f2a45;
+  --pc-lime: #9ac72c;
+  --pc-lime-dark: #5f7f17;
+  --pc-lime-tint: #eef6da;
+  --pc-lime-tint-subtle: #f4f8ea;
+
+  /* Surfaces & Neutrals */
+  --pc-bg: #eef2ec;
+  --pc-bg-grad: radial-gradient(circle at top left, #fbfdf6 0%, #f3f7ea 26%, #eef3e7 48%, #eef2ec 100%);
+  --pc-surface: #ffffff;
+  --pc-surface-2: #f3f6ee;
+  --pc-surface-subtle: #edf2e6;
+  --pc-table-header: #f0f4ea;
+  --pc-row-alt: rgba(243, 246, 238, 0.45);
+  --pc-row-hover: #f3f8e6;
+
+  /* Borders & Outlines */
+  --pc-border: #e2e7dc;
+  --pc-border-soft: #eef0ea;
+  --pc-border-focus: rgba(154, 199, 44, 0.5);
+
+  /* Typography / Text */
+  --pc-ink: #0b1f33;
+  --pc-ink-heading: #0f2a45;
+  --pc-muted: #5f6b7a;
+  --pc-muted-2: #8a94a3;
+
+  /* Navy Shadow Base */
+  --pc-navy-shadow: 15, 42, 69;
+
+  /* Re-map Frappe UI semantic color tokens to Pacecourt Design Language */
+  --surface-base: var(--pc-surface);
+  --surface-sidebar: var(--pc-surface-2);
+  --surface-gray-1: var(--pc-bg);
+  --surface-gray-2: var(--pc-surface-2);
+  --surface-gray-3: var(--pc-surface-subtle);
+  --surface-elevation-1: var(--pc-surface);
+  --surface-elevation-2: var(--pc-surface-2);
+  --surface-elevation-3: var(--pc-surface-subtle);
+
+  --ink-gray-9: var(--pc-ink-heading);
+  --ink-gray-8: var(--pc-ink);
+  --ink-gray-7: var(--pc-muted);
+  --ink-gray-6: var(--pc-muted);
+  --ink-gray-5: var(--pc-muted-2);
+
+  --outline-gray-1: var(--pc-border-soft);
+  --outline-gray-2: var(--pc-border);
+
+  /* Elevation: Navy tinted shadows (never pure grey/black) */
+  --elevation-sm: 0 4px 12px rgba(var(--pc-navy-shadow), 0.04), 0 1px 3px rgba(var(--pc-navy-shadow), 0.06);
+  --elevation-base: 0 8px 18px rgba(var(--pc-navy-shadow), 0.06);
+  --elevation-md: 0 12px 30px rgba(var(--pc-navy-shadow), 0.05);
+  --elevation-lg: 0 24px 50px rgba(var(--pc-navy-shadow), 0.12);
+}
+
+[data-theme='dark'] {
+  --pc-navy: #dce7f2;
+  --pc-navy-deep: #eef3ea;
+  --pc-avatar-bg: #1e3a58;
+  --pc-bg: #0a1626;
+  --pc-bg-grad: radial-gradient(circle at top left, #122236 0%, #0e1c2e 30%, #0b1826 60%, #0a1626 100%);
+  --pc-surface: #11233a;
+  --pc-surface-2: #0e1d30;
+  --pc-surface-subtle: #172c44;
+  --pc-table-header: #0e1d30;
+  --pc-row-alt: rgba(14, 29, 48, 0.45);
+  --pc-row-hover: #162a42;
+  --pc-border: #1f3c58;
+  --pc-border-soft: #1a3350;
+  --pc-border-focus: rgba(180, 224, 67, 0.5);
+  --pc-ink: #eef3ea;
+  --pc-ink-heading: #dce7f2;
+  --pc-muted: #96a6b8;
+  --pc-muted-2: #6f8296;
+  --pc-lime: #b4e043;
+  --pc-lime-dark: #9ac72c;
+  --pc-lime-tint: #17301a;
+  --pc-lime-tint-subtle: #142a17;
+  --pc-navy-shadow: 0, 0, 0;
+
+  --surface-base: var(--pc-surface);
+  --surface-sidebar: var(--pc-surface-subtle);
+  --surface-gray-1: var(--pc-bg);
+  --surface-gray-2: var(--pc-surface-2);
+  --surface-gray-3: var(--pc-surface-subtle);
+  --surface-elevation-1: var(--pc-surface);
+  --surface-elevation-2: var(--pc-surface-2);
+  --surface-elevation-3: var(--pc-surface-subtle);
+
+  --ink-gray-9: var(--pc-ink);
+  --ink-gray-8: var(--pc-ink-heading);
+  --ink-gray-7: var(--pc-muted);
+  --ink-gray-6: var(--pc-muted);
+  --ink-gray-5: var(--pc-muted-2);
+
+  --outline-gray-1: var(--pc-border-soft);
+  --outline-gray-2: var(--pc-border);
+}
+
+/* ==========================================================================
+   Base Typography & Global Canvas
+   ========================================================================== */
+html,
+body,
+#app {
+  font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  background-color: var(--pc-bg) !important;
+  background-image: var(--pc-bg-grad) !important;
+  background-attachment: fixed !important;
+  color: var(--pc-ink) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code,
+kbd,
+samp,
+pre,
+.font-mono,
+[data-mono] {
+  font-family: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace !important;
+}
+
+::selection {
+  background: var(--pc-lime);
+  color: #0b1f33;
+}
+
+/* ==========================================================================
+   Component Styling - Pacecourt Design System
+   ========================================================================== */
+
+/* Primary Button: Signature Black-to-Lime Gradient Pill */
+button[data-variant='solid'],
+.btn-primary-gradient {
+  background: linear-gradient(90deg, #0f0f0f 0%, #9ac72c 100%) !important;
+  color: #ffffff !important;
+  border-radius: 9999px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  box-shadow: 0 8px 18px rgba(94, 128, 25, 0.24) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+button[data-variant='solid']:hover,
+.btn-primary-gradient:hover {
+  transform: scale(1.02) !important;
+  box-shadow: 0 10px 22px rgba(94, 128, 25, 0.32) !important;
+}
+
+button[data-variant='solid']:active,
+.btn-primary-gradient:active {
+  transform: scale(0.99) !important;
+}
+
+/* Secondary Button: Clean Pill with Adaptive Border */
+button[data-variant='outline'],
+button[data-variant='subtle'],
+.btn-secondary-pill {
+  border-radius: 9999px !important;
+  border: 1px solid var(--pc-border) !important;
+  background-color: var(--pc-surface) !important;
+  color: var(--pc-ink-heading) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(var(--pc-navy-shadow), 0.05) !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease !important;
+}
+
+button[data-variant='outline']:hover,
+button[data-variant='subtle']:hover,
+.btn-secondary-pill:hover {
+  background-color: var(--pc-surface-2) !important;
+  border-color: var(--pc-border) !important;
+}
+
+/* General Button Pill Shape */
+button:not(.no-pill):not([class*='rounded-none']):not([class*='size-']) {
+  border-radius: 9999px;
+}
+
+/* Input Fields: 10px radius, adaptive fill & border, lime focus ring */
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='number'],
+input[type='search'],
+input[type='tel'],
+select,
+textarea {
+  border-radius: 10px !important;
+  background-color: var(--pc-surface-2) !important;
+  border: 1px solid var(--pc-border) !important;
+  color: var(--pc-ink-heading) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: rgba(154, 199, 44, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(154, 199, 44, 0.2) !important;
+}
+
+/* Toasts / Notifications: Unified styling across themes */
+[data-sonner-toast] {
+  background-color: var(--pc-surface) !important;
+  border: 1px solid var(--pc-border) !important;
+  color: var(--pc-ink) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22) !important;
+}
+
+[data-sonner-toast] [data-title],
+[data-sonner-toast] [data-description] {
+  color: var(--pc-ink-heading) !important;
+}
+
+[data-sonner-toast] [data-close-button] {
+  color: var(--pc-muted) !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  color: var(--pc-ink-heading) !important;
+  background-color: var(--pc-surface-subtle) !important;
+}
+
+/* Status Chips & Badges: Pill shape with exact design palette */
+.badge,
+[data-badge] {
+  border-radius: 9999px !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  padding: 3px 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+/* Sidebar Navigation Item - Pacecourt Design System */
+div[data-slot='sidebar-item'] {
+  border-radius: 9999px !important;
+  margin-bottom: 2px !important;
+  transition: all 0.15s ease !important;
+}
+
+div[data-slot='sidebar-item'][data-state='active'] {
+  background-color: var(--pc-lime-tint) !important;
+  color: var(--pc-lime-dark) !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+}
+
+div[data-slot='sidebar-item'][data-state='active'] * {
+  color: var(--pc-lime-dark) !important;
+  font-weight: 700 !important;
+}
+
+div[data-slot='sidebar-item'][data-state='inactive']:hover {
+  background-color: var(--pc-surface-2) !important;
+}
+
+div[data-slot='sidebar-item'][data-state='inactive'] * {
+  color: var(--pc-muted) !important;
+  font-weight: 500 !important;
+}
+
+div[data-slot='sidebar-item'][data-state='inactive']:hover * {
+  color: var(--pc-ink-heading) !important;
+}
+
+/* Card Surface Class */
+.pc-card {
+  background: var(--pc-surface);
+  border: 1px solid var(--pc-border);
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(var(--pc-navy-shadow), 0.05);
+}
+
+/* ==========================================================================
+   Table & List Views - Pacecourt Accent & UX Polish
+   ========================================================================== */
+
+/* Table List Header: subtle warm sage tint with crisp border */
+[class*='grid'][class*='bg-surface-gray-2'][class*='rounded-4'],
+.bg-surface-gray-2.rounded-4,
+[data-slot='list-header'] {
+  background-color: var(--pc-table-header) !important;
+  border: 1px solid var(--pc-border) !important;
+  border-radius: 12px !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  box-shadow: 0 1px 3px rgba(var(--pc-navy-shadow), 0.03) !important;
+}
+
+/* Header Column Label Typography */
+[class*='grid'][class*='bg-surface-gray-2'] [class*='text-ink-gray-5'],
+.bg-surface-gray-2.rounded-4 [class*='text-ink-gray-5'] {
+  color: var(--pc-ink-heading) !important;
+  font-weight: 600 !important;
+  font-size: 11.5px !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+}
+
+/* Table Rows: subtle divider, alternating tint, and lime-tinted hover */
+.mx-3.sm\:mx-5 > [class*='flex flex-col'][class*='transition-all'],
+[class*='ListRows'] > [class*='flex flex-col'] {
+  border-bottom: 1px solid var(--pc-border-soft) !important;
+  border-radius: 8px !important;
+  margin-bottom: 1px !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease !important;
+}
+
+.mx-3.sm\:mx-5 > [class*='flex flex-col'][class*='transition-all']:nth-child(even),
+[class*='ListRows'] > [class*='flex flex-col']:nth-child(even) {
+  background-color: var(--pc-row-alt);
+}
+
+.mx-3.sm\:mx-5 > [class*='flex flex-col'][class*='transition-all']:hover,
+[class*='ListRows'] > [class*='flex flex-col']:hover {
+  background-color: var(--pc-row-hover) !important;
+}
+
+/* Table First Column Name Emphasis */
+[class*='ListRows'] [class*='text-ink-gray-9'] {
+  color: var(--pc-navy) !important;
+  font-weight: 600 !important;
+}
+
+/* Selected Row in Table */
+.mx-3.sm\:mx-5 > [class*='flex flex-col'].bg-surface-gray-2,
+[class*='ListRows'] > [class*='flex flex-col'].bg-surface-gray-2 {
+  background-color: var(--pc-lime-tint) !important;
+  border-color: rgba(154, 199, 44, 0.4) !important;
+}
+
+/* Checkbox: Crisp brand accent */
+input[type='checkbox'] {
+  border-radius: 5px !important;
+  border: 1.5px solid var(--pc-border) !important;
+  background-color: var(--pc-surface) !important;
+  transition: all 0.15s ease !important;
+}
+
+input[type='checkbox']:checked,
+input[type='checkbox']:indeterminate {
+  background-color: var(--pc-navy) !important;
+  border-color: var(--pc-navy) !important;
+  color: var(--pc-lime) !important;
+}
+
+input[type='checkbox']:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(154, 199, 44, 0.25) !important;
+}
+
+/* ==========================================================================
+   Detail Tabs & Section Polish
+   ========================================================================== */
+
+/* Tabs Bar & Underline Indicator */
+[data-slot='tab-list'] {
+  border-bottom: 1px solid var(--pc-border) !important;
+  background-color: var(--pc-surface) !important;
+}
+
+[data-slot='tab-indicator'] > div {
+  background: linear-gradient(90deg, var(--pc-navy) 0%, var(--pc-lime) 100%) !important;
+  height: 3px !important;
+  border-radius: 9999px !important;
+}
+
+[data-slot='tab-trigger'] {
+  font-weight: 500 !important;
+  color: var(--pc-muted) !important;
+  transition: color 0.15s ease !important;
+}
+
+[data-slot='tab-trigger'][data-state='active'] {
+  color: var(--pc-navy) !important;
+  font-weight: 700 !important;
+}
+
+[data-slot='tab-trigger'][data-state='inactive']:hover {
+  color: var(--pc-ink-heading) !important;
+}
+
+/* Activity timeline cards (Calls, Comments, Notes, Tasks) */
+.activity [class*='rounded-5'][class*='bg-surface-gray-1'],
+.activity [class*='rounded-4'][class*='bg-surface-gray-1'],
+[class*='rounded-5'][class*='bg-surface-elevation-1'] {
+  background-color: var(--pc-surface-2) !important;
+  border: 1px solid var(--pc-border) !important;
+  border-radius: 14px !important;
+  transition: all 0.15s ease !important;
+}
+
+.activity [class*='rounded-5'][class*='bg-surface-gray-1']:hover,
+.activity [class*='rounded-4'][class*='bg-surface-gray-1']:hover,
+[class*='rounded-5'][class*='bg-surface-elevation-1']:hover {
+  box-shadow: 0 4px 14px rgba(var(--pc-navy-shadow), 0.06) !important;
+  border-color: rgba(154, 199, 44, 0.45) !important;
+}
+
+/* Activity Timeline Icon Hub */
+.activity .before\:border-l {
+  border-color: var(--pc-border) !important;
+}
+
+/* Quick Filter Pills in ViewControls */
+.min-w-36 input {
+  border-radius: 9999px !important;
+  background-color: var(--pc-surface-2) !important;
+  border: 1px solid var(--pc-border) !important;
+  font-size: 13px !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.min-w-36 input:focus {
+  border-color: rgba(154, 199, 44, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(154, 199, 44, 0.2) !important;
+}
+
+/* Custom Sleek Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--pc-border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--pc-muted-2);
+}
+
+/* Top 3px Ambient Loading Bar */
+.top-loader-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, #0f0f0f 0%, #9ac72c 100%);
+  z-index: 99999;
+  pointer-events: none;
+}
+
 @layer components {
   .prose-f {
     @apply break-words
@@ -23,19 +487,15 @@
   }
 }
 
-/* Reka menu content (e.g. the kebab menu inside PrimaryDropdown) portals to
-   <body> without a z-index, so it falls behind frappe-ui Popover content
-   (z-[100]). Lift menus above popovers so nested menus stay visible. */
+/* Reka menu content z-index */
 .menu-content {
   z-index: 101;
 }
 
-/* the editor's @ list is attached to the page body, so let it take clicks while a dialog is open */
 [role='dialog'][aria-label='Suggestions'] {
   pointer-events: auto;
 }
 
-/* mentions show a hover card, so use the arrow instead of the text cursor */
 .mention[data-id] {
   cursor: default;
 }

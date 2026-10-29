@@ -1,18 +1,32 @@
 <template>
   <svg
-    width="300"
-    height="300"
-    viewBox="0 0 300 300"
+    viewBox="0 0 40 40"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    class="size-8 shrink-0 rounded-2xl shadow-sm"
   >
+    <rect width="40" height="40" rx="12" fill="url(#pc-chip-grad)" />
+    <!-- Pacecourt chevron / court mark -->
     <path
-      d="M214.286 0H85.7143C38.3756 0 0 38.3756 0 85.7143V214.286C0 261.624 38.3756 300 85.7143 300H214.286C261.624 300 300 261.624 300 214.286V85.7143C300 38.3756 261.624 0 214.286 0Z"
-      fill="#EF0BF5"
+      d="M12 24L20 14L28 24"
+      stroke="#9AC72C"
+      stroke-width="3.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
     />
     <path
-      d="M64.2141 90.301V111.862H214.339V140.214L160.187 193.146V208.993L139.705 208.885V193.146L85.6605 140.214H64.2141V149.269L118.259 202.202V230.23L181.634 230.769V202.202L235.786 149.269V90.301H64.2141Z"
-      fill="white"
+      d="M16 26L20 20L24 26"
+      stroke="#FFFFFF"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
     />
+    <defs>
+      <linearGradient id="pc-chip-grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#0F2A45" />
+        <stop offset="0.6" stop-color="#1D6F86" />
+        <stop offset="1" stop-color="#9AC72C" />
+      </linearGradient>
+    </defs>
   </svg>
 </template>

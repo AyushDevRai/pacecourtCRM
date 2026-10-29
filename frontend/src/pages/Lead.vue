@@ -36,6 +36,13 @@
           </Button>
         </template>
       </Dropdown>
+      <Button
+        v-if="doc.dealer"
+        :label="__('Share with Dealer')"
+        iconLeft="lucide-share-2"
+        variant="subtle"
+        @click="shareLeadWithDealer"
+      />
       <Tooltip
         :disabled="!isLeadConversionDisabled"
         :text="__('Cannot convert a lost lead to deal')"
@@ -704,6 +711,24 @@ function beforeStatusChange(data) {
     document.save.submit(null, {
       onSuccess: () => reloadResources(data),
     })
+  }
+}
+
+async function shareLeadWithDealer() {
+  try {
+    const res = await call(
+      'crm.fcrm.doctype.crm_dealer.crm_dealer.get_dealer_brief',
+      { lead_name: doc.value.name }
+    )
+    if (res && res.whatsapp_url) {
+      window.open(res.whatsapp_url, '_blank')
+      toast.success(__('Opening WhatsApp brief for {0}', [res.dealer_name]))
+    } else if (res && res.brief_text) {
+      await navigator.clipboard.writeText(res.brief_text)
+      toast.success(__('Dealer brief copied to clipboard'))
+    }
+  } catch (err) {
+    toast.error(err.message || __('Failed to get dealer brief'))
   }
 }
 

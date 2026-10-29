@@ -10,6 +10,8 @@
 
 | Order | Phase | Scope | Status |
 |---|---|---|---|
+| ~~0~~ | ~~[CRM Quotation Module — Zoho Architecture](./feats/crm-quotation-module/architecture-plan.md)~~ | ~~High Priority Core Module~~ | ✅ Done — Fully Executed |
+| ~~0.5~~ | ~~[Dealer Assignment & Handover Workflow](./feats/dealer-assignment/plan.md)~~ | ~~High Priority Core Flow~~ | ✅ Done — Fully Executed |
 | ~~1~~ | ~~Phase 3A — FieldLayout standalone mode~~ | ~~Small~~ | ✅ Done — [see ARCHIVE](./ARCHIVE.md#phase-3a--fieldlayout-standalone-mode) |
 | ~~2~~ | ~~Phase 2 — formDialog()~~ | ~~Medium~~ | ✅ Done — [see ARCHIVE](./ARCHIVE.md#phase-2--formdialog) |
 | **3** | [Phase 3B — Full decouple (Grid independent)](#phase-3b--full-decouple-grid-independent) | Structural refactor | 🔜 Next |

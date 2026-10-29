@@ -1,48 +1,55 @@
 <template>
-  <Dropdown :options="dropdownItems" v-bind="$attrs">
-    <template #default="{ open }">
-      <button
-        class="flex h-12 items-center rounded-5 py-2 duration-300 ease-in-out"
-        :class="
-          isCollapsed
-            ? 'w-auto px-0'
-            : open
-              ? 'w-full px-2 bg-surface-elevation-3 shadow-sm'
-              : 'w-full px-2 hover:bg-surface-gray-2'
-        "
-      >
-        <BrandLogo v-model="brand" class="h-8 max-w-16 flex-shrink-0" />
-        <div
-          class="flex flex-1 flex-col text-left duration-300 ease-in-out truncate"
+  <div class="flex flex-col">
+    <Dropdown :options="dropdownItems" v-bind="$attrs">
+      <template #default="{ open }">
+        <button
+          class="flex items-center rounded-xl p-2 duration-300 ease-in-out text-left"
           :class="
             isCollapsed
-              ? 'ml-0 w-0 overflow-hidden opacity-0'
-              : 'ml-2 w-auto opacity-100'
+              ? 'w-auto px-0 justify-center'
+              : open
+                ? 'w-full bg-surface-gray-2 shadow-sm'
+                : 'w-full hover:bg-surface-gray-2'
           "
         >
-          <div class="text-base-medium leading-none text-ink-gray-9 truncate">
-            {{ __(brand.name || 'CRM') }}
+          <BrandLogo v-model="brand" class="size-8 shrink-0" />
+          <div
+            class="flex flex-1 flex-col text-left duration-300 ease-in-out truncate"
+            :class="
+              isCollapsed
+                ? 'ml-0 w-0 overflow-hidden opacity-0'
+                : 'ml-2.5 w-auto opacity-100'
+            "
+          >
+            <div class="text-[15px] font-extrabold tracking-tight text-[var(--pc-navy)] leading-tight flex items-center gap-1.5">
+              <span>{{ brand.name || 'PACECOURT' }}</span>
+            </div>
+            <div class="text-[11px] font-medium text-[var(--pc-muted)] truncate">
+              {{ user.full_name }}
+            </div>
           </div>
-          <div class="mt-1 text-sm leading-none text-ink-gray-7 truncate">
-            {{ user.full_name }}
+          <div
+            v-if="!isCollapsed"
+            class="duration-300 ease-in-out ml-1 text-ink-gray-5"
+          >
+            <span
+              class="lucide-chevron-down size-4"
+              aria-hidden="true"
+            />
           </div>
-        </div>
-        <div
-          class="duration-300 ease-in-out"
-          :class="
-            isCollapsed
-              ? 'ml-0 w-0 overflow-hidden opacity-0'
-              : 'ml-2 w-auto opacity-100'
-          "
-        >
-          <span
-            class="lucide-chevron-down size-4 text-ink-gray-5"
-            aria-hidden="true"
-          />
-        </div>
-      </button>
-    </template>
-  </Dropdown>
+        </button>
+      </template>
+    </Dropdown>
+    <div
+      v-if="!isCollapsed"
+      class="mt-2.5 px-2 pb-1 duration-300 ease-in-out"
+    >
+      <div class="text-[11px] leading-tight text-[var(--pc-muted)] font-normal">
+        Smarter marketing insights for faster, better decisions.
+      </div>
+      <div class="mt-2 h-[3px] w-12 rounded-full bg-gradient-to-r from-[#0F0F0F] to-[var(--pc-lime)]" />
+    </div>
+  </div>
 </template>
 
 <script setup>

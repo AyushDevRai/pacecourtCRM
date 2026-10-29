@@ -49,8 +49,10 @@ export const viewsStore = defineStore('crm-views', (doctype) => {
   const homeRoutePriority = [
     'Leads',
     'Deals',
+    'Quotations',
     'Contacts',
     'Organizations',
+    'Dealers',
     'Notes',
     'Tasks',
     'Call Logs',
