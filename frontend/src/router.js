@@ -105,6 +105,12 @@ const routes = [
     component: () => import('@/pages/Dealers.vue'),
   },
   {
+    alias: '/deadlines',
+    path: '/deadlines/view/:viewType?',
+    name: 'Deadlines',
+    component: () => import('@/pages/Deadlines.vue'),
+  },
+  {
     alias: '/call-logs',
     path: '/call-logs/view/:viewType?',
     name: 'Call Logs',
@@ -231,6 +237,24 @@ router.beforeEach(async (to, from, next) => {
     } else {
       next({ name: route_name, params: { viewType: type } })
     }
+  } else if (
+    isLoggedIn &&
+    usersStore().getUser()?.role === 'CRM Coordinator' &&
+    [
+      'Dashboard',
+      'Deals',
+      'Deal',
+      'Quotations',
+      'Quotation',
+      'Contacts',
+      'Contact',
+      'Organizations',
+      'Organization',
+      'Dealers',
+      'Dealer',
+    ].includes(to.name)
+  ) {
+    next({ name: 'Leads' })
   } else if (!isLoggedIn) {
     window.location.href = '/login?redirect-to=/crm'
   } else if (to.matched.length === 0) {

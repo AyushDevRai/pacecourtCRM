@@ -203,6 +203,18 @@
    "role": "Sales User",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CRM Coordinator",
+   "share": 1,
+   "write": 1
   }
  ],
  "row_format": "Dynamic",

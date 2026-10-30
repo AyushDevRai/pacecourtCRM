@@ -99,7 +99,7 @@
             variant="solid"
             icon-left="lucide-trash-2"
             :label="__('Delete')"
-            :loading="isDealCreating"
+            :loading="isDeleting"
             theme="red"
             @click="deleteDoc()"
           />
@@ -131,12 +131,13 @@
           {{ confirmDeleteInfo.message }}
         </div>
         <div class="flex justify-end gap-2 mt-6">
-          <Button variant="ghost" @click="cancel()">
+          <Button variant="ghost" :disabled="isDeleting" @click="cancel()">
             {{ __('Cancel') }}
           </Button>
           <Button
             variant="solid"
             :label="confirmDeleteInfo.title"
+            :loading="isDeleting"
             theme="red"
             @click="removeDocLinks()"
           />
@@ -166,6 +167,7 @@ const props = defineProps({
   title: { type: String, default: null },
   reload: { type: Function, default: null },
 })
+const isDeleting = ref(false)
 const viewControls = ref({
   selections: [],
   updateSelections: (selections) => {
@@ -176,6 +178,9 @@ const viewControls = ref({
 const confirmDeleteInfo = ref({
   show: false,
   title: '',
+  message: '',
+  delete: false,
+  deleteAllAndDoc: false,
 })
 
 const linkedDocsResource = createResource({
@@ -202,7 +207,13 @@ const linkedDocs = computed(() => {
 })
 
 const cancel = () => {
-  confirmDeleteInfo.value.show = false
+  confirmDeleteInfo.value = {
+    show: false,
+    title: '',
+    message: '',
+    delete: false,
+    deleteAllAndDoc: false,
+  }
   viewControls.value.updateSelections([])
 }
 
@@ -211,10 +222,12 @@ const unlinkLinkedDoc = (doc) => {
   if (viewControls.value.selections.length > 0) {
     Array.from(viewControls.value.selections).forEach((selection) => {
       const docData = linkedDocs.value.find((d) => d.id == selection)
-      selectedDocs.push({
-        doctype: docData.reference_doctype,
-        docname: docData.reference_docname,
-      })
+      if (docData) {
+        selectedDocs.push({
+          doctype: docData.reference_doctype,
+          docname: docData.reference_docname,
+        })
+      }
     })
   } else {
     selectedDocs = linkedDocs.value.map((doc) => ({
@@ -223,6 +236,7 @@ const unlinkLinkedDoc = (doc) => {
     }))
   }
 
+  isDeleting.value = true
   withRecipientConfirmation((confirm) =>
     call('crm.api.doc.remove_linked_doc_reference', {
       items: selectedDocs,
@@ -230,26 +244,48 @@ const unlinkLinkedDoc = (doc) => {
       delete: doc.delete,
       ...confirm,
     }),
-  ).then((removed) => {
-    if (!removed) return
-    linkedDocsResource.reload()
-    confirmDeleteInfo.value = {
-      show: false,
-      title: '',
-    }
-  })
+  )
+    .then(async (removed) => {
+      if (!removed) {
+        isDeleting.value = false
+        return
+      }
+      if (doc.deleteAllAndDoc) {
+        await deleteDoc()
+        return
+      }
+      isDeleting.value = false
+      linkedDocsResource.reload()
+      confirmDeleteInfo.value = {
+        show: false,
+        title: '',
+        message: '',
+        delete: false,
+        deleteAllAndDoc: false,
+      }
+    })
+    .catch((err) => {
+      isDeleting.value = false
+      throw err
+    })
 }
 
 const confirmDelete = () => {
-  const items =
-    viewControls.value.selections.length == 0
-      ? 'all'
-      : viewControls.value.selections.length
+  const isAll =
+    viewControls.value.selections.length === 0 ||
+    viewControls.value.selections.length === linkedDocs.value.length
+  const items = isAll ? 'all' : viewControls.value.selections.length
   confirmDeleteInfo.value = {
     show: true,
-    title: __('Delete Linked Item'),
-    message: __('Are you sure you want to delete {0} linked item(s)?', [items]),
+    title: isAll ? __('Delete All') : __('Delete Linked Item'),
+    message: isAll
+      ? __(
+          'Are you sure you want to delete this {0} and all {1} linked item(s)?',
+          [props.doctype, linkedDocs.value.length],
+        )
+      : __('Are you sure you want to delete {0} linked item(s)?', [items]),
     delete: true,
+    deleteAllAndDoc: isAll,
   }
 }
 
@@ -263,6 +299,7 @@ const confirmUnlink = () => {
     title: __('Unlink Linked Item'),
     message: __('Are you sure you want to unlink {0} linked item(s)?', [items]),
     delete: false,
+    deleteAllAndDoc: false,
   }
 }
 
@@ -271,11 +308,13 @@ const removeDocLinks = () => {
     reference_doctype: props.doctype,
     reference_docname: props.docname,
     delete: confirmDeleteInfo.value.delete,
+    deleteAllAndDoc: confirmDeleteInfo.value.deleteAllAndDoc,
   })
   viewControls.value.updateSelections([])
 }
 
 const deleteDoc = async () => {
+  isDeleting.value = true
   // Mark before the request starts: the backend's delete_doc fires a
   // realtime doc_update event that can reach the still-mounted document
   // resource before this awaited call resolves on the frontend.
@@ -286,9 +325,11 @@ const deleteDoc = async () => {
       name: props.docname,
     })
   } catch (err) {
+    isDeleting.value = false
     unmarkDocumentAsDeleted(props.doctype, props.docname)
     throw err
   }
+  isDeleting.value = false
   expireDeletionMarker(props.doctype, props.docname)
   const label = props.title
     ? `${props.docname} (${props.title})`

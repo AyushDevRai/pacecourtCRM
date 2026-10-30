@@ -757,6 +757,15 @@ def remove_doc_link(doctype, docname):
 				delete_references.update(delete_notification_type)
 
 			linked_doc_data.update(delete_references)
+		elif doctype == "CRM Deadline":
+			lead_name = linked_doc_data.get("lead")
+			if lead_name:
+				active = frappe.db.get_value("CRM Lead", lead_name, "custom_active_deadline")
+				if active == docname:
+					frappe.db.set_value("CRM Lead", lead_name, "custom_active_deadline", None, update_modified=False)
+				linked_doc_data.lead = None
+		elif doctype == "CRM Deal":
+			linked_doc_data.lead = None
 		else:
 			linked_doc_data.update(
 				{
@@ -813,11 +822,15 @@ def remove_linked_doc_reference(items: str | list, remove_contact: bool = False,
 				remove_doc_link(item["doctype"], item["docname"])
 
 			if delete:
-				frappe.delete_doc(item["doctype"], item["docname"])
+				if item["doctype"] == "CRM Deadline":
+					lead = frappe.db.get_value("CRM Deadline", item["docname"], "lead")
+					if lead and frappe.db.get_value("CRM Lead", lead, "custom_active_deadline") == item["docname"]:
+						frappe.db.set_value("CRM Lead", lead, "custom_active_deadline", None, update_modified=False)
+				frappe.delete_doc(item["doctype"], item["docname"], force=True, ignore_permissions=True)
 		except WhatsAppRecipientChangeError:
 			raise
-		except (frappe.DoesNotExistError, frappe.ValidationError):
-			# Skip if document doesn't exist or has validation errors
+		except (frappe.DoesNotExistError, frappe.ValidationError) as e:
+			frappe.log_error(f"Error in remove_linked_doc_reference for {item}: {e!s}", "Delete Linked Doc Error")
 			continue
 
 	return "success"
@@ -842,6 +855,12 @@ def delete_bulk_docs(doctype: str, items: str | list, delete_linked: bool = Fals
 			if not frappe.db.exists(doctype, doc):
 				frappe.log_error(f"Document {doctype} {doc} does not exist", "Bulk Delete Error")
 				continue
+
+			if doctype == "CRM Lead":
+				frappe.db.set_value("CRM Lead", doc, "custom_active_deadline", None, update_modified=False)
+				deadlines = frappe.get_all("CRM Deadline", filters={"lead": doc}, pluck="name")
+				for d in deadlines:
+					frappe.delete_doc("CRM Deadline", d, force=True, ignore_permissions=True)
 
 			linked_docs = get_linked_docs_of_document(doctype, doc)
 			for linked_doc in linked_docs:

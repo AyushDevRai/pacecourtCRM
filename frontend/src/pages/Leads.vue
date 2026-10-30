@@ -485,12 +485,51 @@ function parseRows(rows, columns = []) {
           if (new Date(lead.response_by) < new Date()) {
             color = 'red'
           }
+        } else if (!value && lead.custom_coordinator_sla_status) {
+          if (
+            lead.custom_coordinator_sla_status === 'Active' &&
+            lead.custom_coordinator_deadline
+          ) {
+            value = __(timeAgo(lead.custom_coordinator_deadline))
+            tooltipText =
+              'Coordinator Due: ' + formatDate(lead.custom_coordinator_deadline)
+            color =
+              new Date(lead.custom_coordinator_deadline) < new Date()
+                ? 'red'
+                : 'amber'
+          } else if (lead.custom_coordinator_sla_status === 'Fulfilled') {
+            value = __('Triage Done')
+            color = 'green'
+          } else if (lead.custom_coordinator_sla_status === 'Breached') {
+            value = __('Triage Breached')
+            color = 'red'
+          }
         }
         _rows[row] = {
           label: tooltipText,
           value: value,
           color: color,
         }
+      } else if (row == 'custom_coordinator_sla_status') {
+        let value = lead.custom_coordinator_sla_status || '-'
+        let color =
+          value === 'Fulfilled'
+            ? 'green'
+            : value === 'Breached'
+              ? 'red'
+              : 'amber'
+        _rows[row] = {
+          label: value,
+          value: value,
+          color: color,
+        }
+      } else if (row == 'custom_coordinator_deadline') {
+        _rows[row] = lead.custom_coordinator_deadline
+          ? {
+              label: formatDate(lead.custom_coordinator_deadline, '', true, true),
+              timeAgo: __(timeAgo(lead.custom_coordinator_deadline)),
+            }
+          : ''
       } else if (row == 'lead_owner') {
         _rows[row] = {
           label: lead.lead_owner && getUser(lead.lead_owner).full_name,

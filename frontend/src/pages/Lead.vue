@@ -201,7 +201,7 @@
         </template>
       </FileUploader>
       <SLASection
-        v-if="doc.sla_status"
+        v-if="doc.sla_status || doc.custom_coordinator_deadline || doc.custom_coordinator_sla_status"
         v-model="doc"
         @updateField="updateField"
       />

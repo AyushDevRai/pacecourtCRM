@@ -143,7 +143,7 @@ def update_user_role(user: str, new_role: str):
 	frappe.only_for(["System Manager", "Sales Manager"], True)
 	is_system_manager = "System Manager" in frappe.get_roles()
 
-	if new_role not in ["System Manager", "Sales Manager", "Sales User"]:
+	if new_role not in ["System Manager", "Sales Manager", "Sales User", "CRM Coordinator"]:
 		frappe.throw(_("Cannot assign this role"))
 
 	user_doc = frappe.get_doc("User", user)
@@ -162,10 +162,11 @@ def update_user_role(user: str, new_role: str):
 
 	if new_role == "System Manager":
 		user_doc.append_roles("System Manager", "Sales Manager", "Sales User")
+		remove_roles(user_doc, "CRM Coordinator")
 		user_doc.set("block_modules", [])
 	if new_role == "Sales Manager":
 		user_doc.append_roles("Sales Manager", "Sales User")
-		remove_roles(user_doc, "System Manager")
+		remove_roles(user_doc, "System Manager", "CRM Coordinator")
 	if new_role == "Sales User":
 		node = frappe.db.get_value(
 			"CRM Sales Hierarchy", {"user": user}, ["name", "reports_to"], as_dict=True
@@ -177,7 +178,20 @@ def update_user_role(user: str, new_role: str):
 					_("Remove this user from the sales hierarchy before changing their role to Sales User")
 				)
 		user_doc.append_roles("Sales User")
-		remove_roles(user_doc, "Sales Manager", "System Manager")
+		remove_roles(user_doc, "Sales Manager", "System Manager", "CRM Coordinator")
+		update_module_in_user(user_doc, "FCRM")
+	if new_role == "CRM Coordinator":
+		node = frappe.db.get_value(
+			"CRM Sales Hierarchy", {"user": user}, ["name", "reports_to"], as_dict=True
+		)
+		if node:
+			has_reports = frappe.db.exists("CRM Sales Hierarchy", {"reports_to": node.name})
+			if has_reports or not node.reports_to:
+				frappe.throw(
+					_("Remove this user from the sales hierarchy before changing their role to CRM Coordinator")
+				)
+		user_doc.append_roles("CRM Coordinator")
+		remove_roles(user_doc, "Sales Manager", "System Manager", "Sales User")
 		update_module_in_user(user_doc, "FCRM")
 
 	user_doc.save(ignore_permissions=True)
@@ -206,6 +220,8 @@ def remove_crm_roles_from_user(user: str):
 
 	if "Sales User" in roles:
 		remove_roles(user_doc, "Sales User")
+	if "CRM Coordinator" in roles:
+		remove_roles(user_doc, "CRM Coordinator")
 	if "Sales Manager" in roles:
 		remove_roles(user_doc, "Sales Manager")
 	if "System Manager" in roles and current_user_is_system_manager:
@@ -241,6 +257,82 @@ def remove_roles(self, *roles):
 	for role in roles:
 		if role in existing_roles:
 			self.get("roles").remove(existing_roles[role])
+
+
+@frappe.whitelist()
+def sync_coordinator_permissions():
+	"""Ensure CRM Coordinator role and doctype permissions are configured."""
+	if not frappe.db.exists("Role", "CRM Coordinator"):
+		r = frappe.get_doc({"doctype": "Role", "role_name": "CRM Coordinator", "desk_access": 1})
+		r.insert(ignore_permissions=True)
+
+	crud_doctypes = [
+		"CRM Lead",
+		"CRM Deadline",
+		"CRM Task",
+		"CRM Notification",
+		"FCRM Note",
+		"CRM Call Log",
+	]
+	read_only_doctypes = [
+		"CRM Lead Status",
+		"CRM Lead Source",
+		"CRM Territory",
+		"CRM Industry",
+		"CRM Service Day",
+		"CRM Service Level Priority",
+		"CRM Service Level Agreement",
+		"CRM Fields Layout",
+		"CRM View Settings",
+		"CRM Form Script",
+		"CRM Global Settings",
+		"FCRM Settings",
+		"CRM Communication Status",
+		"CRM Lost Reason",
+		"CRM Holiday List",
+		"CRM Holiday",
+		"CRM Dropdown Item",
+	]
+
+	for dt in crud_doctypes:
+		if not frappe.db.exists("DocPerm", {"parent": dt, "role": "CRM Coordinator"}):
+			frappe.get_doc({
+				"doctype": "DocPerm",
+				"parent": dt,
+				"parenttype": "DocType",
+				"parentfield": "permissions",
+				"role": "CRM Coordinator",
+				"read": 1,
+				"write": 1,
+				"create": 1,
+				"delete": 0,
+				"share": 1,
+				"email": 1,
+				"print": 1,
+				"report": 1,
+			}).insert(ignore_permissions=True)
+
+	for dt in read_only_doctypes:
+		if not frappe.db.exists("DocPerm", {"parent": dt, "role": "CRM Coordinator"}):
+			frappe.get_doc({
+				"doctype": "DocPerm",
+				"parent": dt,
+				"parenttype": "DocType",
+				"parentfield": "permissions",
+				"role": "CRM Coordinator",
+				"read": 1,
+				"write": 0,
+				"create": 0,
+				"delete": 0,
+				"share": 0,
+				"email": 0,
+				"print": 0,
+				"report": 1,
+			}).insert(ignore_permissions=True)
+
+	frappe.clear_cache()
+	return True
+
 
 
 def update_module_in_user(user, module):

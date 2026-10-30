@@ -27,8 +27,8 @@ def _permission_query_conditions(user: str | None, doctype: str):
 
 	in_tree = hierarchy_enabled() and _in_hierarchy(user)
 
-	# Sales Manager outside the tree retains the default ie sees everything
-	if "Sales Manager" in roles and not in_tree:
+	# Sales Manager or CRM Coordinator outside the tree retains the default ie sees everything
+	if ("Sales Manager" in roles or "CRM Coordinator" in roles) and not in_tree:
 		return ""
 
 	owner_field = _OWNER_FIELD[doctype]
@@ -85,7 +85,7 @@ def _has_permission(doc, ptype, user, doctype: str) -> bool | None:
 		return True
 
 	in_tree = hierarchy_enabled() and _in_hierarchy(user)
-	if "Sales Manager" in roles and not in_tree:
+	if ("Sales Manager" in roles or "CRM Coordinator" in roles) and not in_tree:
 		return True
 
 	conditions = _permission_query_conditions(user, doctype)

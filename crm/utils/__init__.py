@@ -38,23 +38,38 @@ def sanitize_public_url(url: str | None) -> str | None:
 		)
 
 		if not is_local:
+			# If URL has the raw VPS IP or a forwarded host is available, resolve to proper domain
+			req = getattr(frappe.local, "request", None)
+			public_host = None
+			if req:
+				forwarded_host = req.headers.get("X-Forwarded-Host") or req.headers.get("Host")
+				if forwarded_host and not any(h in forwarded_host for h in ("localhost", "127.0.0.1", "0.0.0.0")):
+					public_host = forwarded_host.split(":")[0]
+
+			if not public_host:
+				conf_host = frappe.conf.get("host_name")
+				if conf_host:
+					public_host = urlparse(conf_host).hostname
+				if not public_host or public_host == "187.127.128.195":
+					public_host = "srv1484793.hstgr.cloud"
+
+			effective_host = public_host or hostname
+
 			# On production / deployed VPS:
-			# Internal ports like 8000 (standard Frappe webserver_port / gunicorn) should not be exposed.
-			# Standard ports 80 and 443 are handled by Nginx / reverse proxy.
-			if port in (8000, 80, 443):
-				netloc = hostname
-				if parsed.username or parsed.password:
-					auth = f"{parsed.username or ''}{':' + parsed.password if parsed.password else ''}@"
-					netloc = f"{auth}{hostname}"
+			# Internal ports like 8000 should not be exposed.
+			netloc = effective_host
+			if parsed.username or parsed.password:
+				auth = f"{parsed.username or ''}{':' + parsed.password if parsed.password else ''}@"
+				netloc = f"{auth}{effective_host}"
 
-				scheme = parsed.scheme
-				if getattr(frappe.local, "request", None):
-					forwarded_proto = frappe.local.request.headers.get("X-Forwarded-Proto")
-					if forwarded_proto:
-						scheme = forwarded_proto
+			scheme = "https" if (effective_host not in ("localhost", "127.0.0.1")) else parsed.scheme
+			if req:
+				forwarded_proto = req.headers.get("X-Forwarded-Proto")
+				if forwarded_proto:
+					scheme = forwarded_proto
 
-				parsed = parsed._replace(netloc=netloc, scheme=scheme)
-				return urlunparse(parsed)
+			parsed = parsed._replace(netloc=netloc, scheme=scheme)
+			return urlunparse(parsed)
 	except Exception:
 		pass
 
@@ -229,7 +244,13 @@ def is_sales_user(user: str | None = None) -> bool:
 	:return: Whether `user` is an agent
 	"""
 	user = user or frappe.session.user
-	return is_admin() or "Sales Manager" in frappe.get_roles(user) or "Sales User" in frappe.get_roles(user)
+	user_roles = frappe.get_roles(user)
+	return (
+		is_admin()
+		or "Sales Manager" in user_roles
+		or "Sales User" in user_roles
+		or "CRM Coordinator" in user_roles
+	)
 
 
 def sales_user_only(fn: callable) -> callable:

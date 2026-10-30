@@ -147,6 +147,10 @@ export const usersStore = defineStore('crm-users', () => {
     return getUser(email).role === 'Sales User'
   }
 
+  function isCoordinator(email) {
+    return getUser(email).role === 'CRM Coordinator'
+  }
+
   function isTelephonyAgent(email) {
     return getUser(email).is_telephony_agent
   }
@@ -172,6 +176,7 @@ export const usersStore = defineStore('crm-users', () => {
     getUser,
     isAdmin,
     isManager,
+    isCoordinator,
     isSalesUser,
     isTelephonyAgent,
     getUserRole,

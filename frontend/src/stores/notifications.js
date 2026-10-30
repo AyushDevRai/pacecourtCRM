@@ -33,6 +33,22 @@ export const notificationsStore = defineStore('crm-notifications', () => {
     },
   })
 
+  const clear_all = createResource({
+    url: 'crm.api.notifications.clear_all_notifications',
+    onSuccess: () => {
+      notifications.reload()
+      unreadCount.reload()
+    },
+  })
+
+  const clear_single = createResource({
+    url: 'crm.api.notifications.clear_notification',
+    onSuccess: () => {
+      notifications.reload()
+      unreadCount.reload()
+    },
+  })
+
   function toggle() {
     visible.value = !visible.value
   }
@@ -43,10 +59,20 @@ export const notificationsStore = defineStore('crm-notifications', () => {
     toggle()
   }
 
+  function clearAll() {
+    clear_all.submit()
+  }
+
+  function clearNotification(name) {
+    clear_single.submit({ notification_name: name })
+  }
+
   return {
     unreadNotificationsCount,
     mark_as_read,
     mark_doc_as_read,
+    clearAll,
+    clearNotification,
     toggle,
   }
 })

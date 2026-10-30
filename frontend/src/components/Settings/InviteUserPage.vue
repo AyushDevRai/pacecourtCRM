@@ -153,6 +153,8 @@ const description = computed(() => {
       'Can manage all aspects of the CRM, including user management, customizations and settings.',
     'Sales Manager':
       'Can manage and invite new users, and create public & private views (reports).',
+    'CRM Coordinator':
+      'First-touch triage & assignment: Has access only to Leads, Tasks, Deadlines, Call Logs, Notes, and Notifications. All other modules are locked.',
     'Sales User':
       'Can work with leads and deals and create private views (reports).',
   }[role.value]
@@ -161,6 +163,7 @@ const description = computed(() => {
 const roleOptions = computed(() => {
   return [
     { value: 'Sales User', label: __('Sales User') },
+    { value: 'CRM Coordinator', label: __('CRM Coordinator') },
     ...(isAdmin() ? [{ value: 'Sales Manager', label: __('Manager') }] : []),
     ...(isAdmin() ? [{ value: 'System Manager', label: __('Admin') }] : []),
   ]
@@ -168,6 +171,7 @@ const roleOptions = computed(() => {
 
 const roleMap = {
   'Sales User': __('Sales User'),
+  'CRM Coordinator': __('CRM Coordinator'),
   'Sales Manager': __('Manager'),
   'System Manager': __('Admin'),
 }

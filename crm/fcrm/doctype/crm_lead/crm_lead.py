@@ -129,6 +129,30 @@ class CRMLead(Document):
 	def before_save(self):
 		self.apply_sla()
 
+	def on_trash(self):
+		# Break circular foreign key link with CRM Deadline
+		if self.get("custom_active_deadline"):
+			frappe.db.set_value("CRM Lead", self.name, "custom_active_deadline", None, update_modified=False)
+			self.custom_active_deadline = None
+
+		# Clean up any associated CRM Deadline records for this lead
+		deadlines = frappe.get_all("CRM Deadline", filters={"lead": self.name}, pluck="name")
+		for deadline_name in deadlines:
+			frappe.delete_doc("CRM Deadline", deadline_name, force=True, ignore_permissions=True)
+
+		# Clean up any SLA tasks associated with this lead
+		sla_tasks = frappe.get_all(
+			"CRM Task",
+			filters={
+				"reference_doctype": "CRM Lead",
+				"reference_docname": self.name,
+				"custom_is_sla_task": 1,
+			},
+			pluck="name",
+		)
+		for task_name in sla_tasks:
+			frappe.delete_doc("CRM Task", task_name, force=True, ignore_permissions=True)
+
 	def validate_status(self):
 		if self.is_new() and not self.status:
 			if frappe.db.exists("CRM Lead Status", "New"):

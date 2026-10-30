@@ -9,12 +9,21 @@
       />
     </template>
     <template #right-header>
-      <Button
-        :tooltip="__('Mark all as read')"
-        :label="__('Mark all as read')"
-        :iconLeft="MarkAsDoneIcon"
-        @click="() => mark_as_read.reload()"
-      />
+      <div class="flex items-center gap-1">
+        <Button
+          v-if="notifications.data?.length"
+          :tooltip="__('Mark all as read')"
+          :iconLeft="MarkAsDoneIcon"
+          @click="() => mark_as_read.reload()"
+        />
+        <Button
+          v-if="notifications.data?.length"
+          :tooltip="__('Clear all')"
+          iconLeft="lucide-trash-2"
+          theme="red"
+          @click="() => clearAll()"
+        />
+      </div>
     </template>
   </LayoutHeader>
   <div class="flex flex-col overflow-hidden text-ink-gray-9">
@@ -80,7 +89,7 @@ import { Breadcrumbs } from 'frappe-ui'
 import { onMounted, onBeforeUnmount } from 'vue'
 
 const { $socket } = globalStore()
-const { mark_as_read, mark_doc_as_read } = notificationsStore()
+const { mark_as_read, mark_doc_as_read, clearAll } = notificationsStore()
 
 onBeforeUnmount(() => {
   $socket.off('crm_notification')

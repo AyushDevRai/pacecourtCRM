@@ -85,6 +85,7 @@
             { label: __('Admin'), value: 'System Manager' },
             { label: __('Manager'), value: 'Sales Manager' },
             { label: __('Sales User'), value: 'Sales User' },
+            { label: __('CRM Coordinator'), value: 'CRM Coordinator' },
           ]"
         />
       </div>
@@ -135,7 +136,9 @@
                       ? 'lucide-shield'
                       : user.role === 'Sales Manager'
                         ? 'lucide-briefcase'
-                        : 'lucide-user-check',
+                        : user.role === 'CRM Coordinator'
+                          ? 'lucide-headset'
+                          : 'lucide-user-check',
                 }"
                 align="end"
               />
@@ -192,6 +195,7 @@ const roleMap = {
   'System Manager': __('Admin'),
   'Sales Manager': __('Manager'),
   'Sales User': __('Sales User'),
+  'CRM Coordinator': __('CRM Coordinator'),
 }
 
 const usersList = computed(() => {
@@ -243,6 +247,12 @@ function getDropdownOptions(user) {
       icon: 'lucide-user-check',
       selected: user.role === 'Sales User',
       onClick: () => updateRole(user, 'Sales User'),
+    },
+    {
+      label: __('CRM Coordinator'),
+      icon: 'lucide-headset',
+      selected: user.role === 'CRM Coordinator',
+      onClick: () => updateRole(user, 'CRM Coordinator'),
     },
   ]
 

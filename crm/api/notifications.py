@@ -12,6 +12,7 @@ def get_notifications():
 	notifications = (
 		frappe.qb.from_(Notification)
 		.select(
+			Notification.name,
 			Notification.creation,
 			Notification.from_user,
 			Notification.to_user,
@@ -40,6 +41,7 @@ def get_notifications():
 	for notification in notifications:
 		_notifications.append(
 			{
+				"name": notification.name,
 				"creation": notification.creation,
 				"from_user": {
 					"name": notification.from_user,
@@ -59,6 +61,26 @@ def get_notifications():
 		)
 
 	return _notifications
+
+
+@frappe.whitelist()
+def clear_all_notifications():
+	"""Deletes all notifications for current user."""
+	user = frappe.session.user
+	frappe.db.delete("CRM Notification", {"to_user": user})
+	frappe.db.commit()
+	frappe.publish_realtime("crm_notification", user=user)
+	return True
+
+
+@frappe.whitelist()
+def clear_notification(notification_name: str):
+	"""Deletes a specific notification for current user."""
+	user = frappe.session.user
+	frappe.db.delete("CRM Notification", {"name": notification_name, "to_user": user})
+	frappe.db.commit()
+	frappe.publish_realtime("crm_notification", user=user)
+	return True
 
 
 @frappe.whitelist()

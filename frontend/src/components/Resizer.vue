@@ -1,5 +1,10 @@
 <template>
-  <div class="relative" :style="{ width: `${sidebarWidth}px` }">
+  <div
+    class="relative"
+    :data-side-panel="side"
+    :data-side="side"
+    :style="{ width: `${sidebarWidth}px` }"
+  >
     <slot v-bind="{ sidebarResizing, sidebarWidth }" />
     <div
       class="absolute z-10 h-full w-1 cursor-col-resize bg-surface-gray-4 opacity-0 transition-opacity hover:opacity-100"

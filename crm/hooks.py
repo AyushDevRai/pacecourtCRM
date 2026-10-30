@@ -276,6 +276,9 @@ doc_events = {
 		],
 	},
 	"CRM Lead": {
+		"after_insert": [
+			"crm.automation.lead_sla.on_lead_update",
+		],
 		"on_update": [
 			"crm.automation.events.on_lead_update",
 			"crm.automation.lead_sla.on_lead_update",

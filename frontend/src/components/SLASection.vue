@@ -49,71 +49,118 @@ const { capture } = useTelemetry()
 
 let slaSection = computed(() => {
   let sections = []
-  let status = data.value.sla_status
-  let tooltipText = status
-  let color =
-    data.value.sla_status == 'Failed'
-      ? 'red'
-      : data.value.sla_status == 'Fulfilled'
-        ? 'green'
-        : 'amber'
-  let respondedOn =
-    data.value.last_responded_on || data.value.first_responded_on
-  let responseTime =
-    data.value.last_response_time || data.value.first_response_time
 
-  if (status == 'First Response Due' || status == 'Rolling Response Due') {
-    status = timeAgo(data.value.response_by)
-    if (status == 'just now') {
-      status = 'In less than a minute'
-    }
-    tooltipText = formatDate(data.value.response_by)
-    if (new Date(data.value.response_by) < new Date()) {
-      color = 'red'
-      if (status == __('In less than a minute')) {
-        status = 'less than a minute ago'
-      }
-    }
-  } else if (['Fulfilled', 'Failed'].includes(status)) {
-    status = __(status) + ' in ' + formatTime(responseTime)
-    tooltipText = formatDate(respondedOn)
-  }
-
-  let responseType = 'First Response'
-
+  // Stage 1: Coordinator Triage SLA
   if (
-    Boolean(data.value.first_responded_on) &&
-    Boolean(data.value.last_responded_on) &&
-    (data.value.sla_status != 'Fulfilled' ||
-      data.value.first_responded_on != data.value.last_responded_on)
+    data.value.custom_coordinator_deadline ||
+    data.value.custom_coordinator_sla_status
   ) {
-    responseType = 'Rolling Response'
+    let cStatus = data.value.custom_coordinator_sla_status || 'Active'
+    let cTooltip = cStatus
+    let cColor = 'amber'
+    let cValue = cStatus
+
+    if (cStatus === 'Active' && data.value.custom_coordinator_deadline) {
+      cValue = timeAgo(data.value.custom_coordinator_deadline)
+      if (cValue === 'just now') {
+        cValue = 'In less than a minute'
+      }
+      cTooltip = formatDate(data.value.custom_coordinator_deadline)
+      if (new Date(data.value.custom_coordinator_deadline) < new Date()) {
+        cColor = 'red'
+      } else {
+        cColor = 'amber'
+      }
+    } else if (cStatus === 'Fulfilled') {
+      cColor = 'green'
+      cValue = __('Fulfilled')
+      cTooltip = data.value.custom_coordinator_deadline
+        ? formatDate(data.value.custom_coordinator_deadline)
+        : __('Fulfilled on time')
+    } else if (cStatus === 'Breached') {
+      cColor = 'red'
+      cValue = __('Breached')
+      cTooltip = data.value.custom_coordinator_deadline
+        ? formatDate(data.value.custom_coordinator_deadline)
+        : __('SLA Breached')
+    }
+
+    sections.push({
+      label: 'Coordinator Triage',
+      type: 'Badge',
+      value: __(cValue),
+      tooltipText: cTooltip,
+      color: cColor,
+    })
   }
 
-  sections.push(
-    ...[
-      {
-        label: responseType,
-        type: 'Badge',
-        value: __(status),
-        tooltipText: tooltipText,
-        color: color,
-      },
-      {
-        label: 'Status',
-        value: data.value.communication_status,
-        type: 'Select',
-        options: communicationStatuses.data?.map((status) => ({
-          label: status.name,
-          value: status.name,
-          onClick: () => {
-            capture('sla_status_change')
-            emit('updateField', 'communication_status', status.name)
-          },
-        })),
-      },
-    ],
-  )
+  // Stage 2: Sales Rep Response SLA
+  let status = data.value.sla_status
+  if (status) {
+    let tooltipText = status
+    let color =
+      status == 'Failed'
+        ? 'red'
+        : status == 'Fulfilled'
+          ? 'green'
+          : 'amber'
+    let respondedOn =
+      data.value.last_responded_on || data.value.first_responded_on
+    let responseTime =
+      data.value.last_response_time || data.value.first_response_time
+
+    if (status == 'First Response Due' || status == 'Rolling Response Due') {
+      status = timeAgo(data.value.response_by)
+      if (status == 'just now') {
+        status = 'In less than a minute'
+      }
+      tooltipText = formatDate(data.value.response_by)
+      if (new Date(data.value.response_by) < new Date()) {
+        color = 'red'
+        if (status == __('In less than a minute')) {
+          status = 'less than a minute ago'
+        }
+      }
+    } else if (['Fulfilled', 'Failed'].includes(status)) {
+      status = __(status) + ' in ' + formatTime(responseTime)
+      tooltipText = formatDate(respondedOn)
+    }
+
+    let responseType = 'First Response'
+
+    if (
+      Boolean(data.value.first_responded_on) &&
+      Boolean(data.value.last_responded_on) &&
+      (data.value.sla_status != 'Fulfilled' ||
+        data.value.first_responded_on != data.value.last_responded_on)
+    ) {
+      responseType = 'Rolling Response'
+    }
+
+    sections.push({
+      label: responseType,
+      type: 'Badge',
+      value: __(status),
+      tooltipText: tooltipText,
+      color: color,
+    })
+  }
+
+  if (communicationStatuses.data?.length) {
+    sections.push({
+      label: 'Status',
+      value: data.value.communication_status,
+      type: 'Select',
+      options: communicationStatuses.data?.map((cStatus) => ({
+        label: cStatus.name,
+        value: cStatus.name,
+        onClick: () => {
+          capture('sla_status_change')
+          emit('updateField', 'communication_status', cStatus.name)
+        },
+      })),
+    })
+  }
   return sections
 })
 </script>

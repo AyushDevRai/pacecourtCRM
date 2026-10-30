@@ -27,25 +27,34 @@
             :label="__('Notifications')"
             :route="mobile ? { name: 'Notifications' } : undefined"
             :active="mobile && activeItem === 'Notifications'"
+            :class="{ 'notify-flash-pulse': isFlashingNotification }"
             @click="onNotificationsClick"
           >
             <template #prefix>
               <span class="relative grid size-4 place-items-center">
-                <NotificationsIcon class="size-4 text-ink-gray-7" />
+                <NotificationsIcon
+                  class="size-4 transition-colors"
+                  :class="isFlashingNotification ? 'text-[var(--pc-lime)]' : 'text-ink-gray-7'"
+                />
                 <span
                   v-if="isCollapsed && unreadNotificationsCount"
-                  class="absolute -right-1 -top-1 size-1.5 rounded-full bg-surface-gray-9 ring-1 ring-[var(--surface-gray-1)]"
+                  class="absolute -right-1 -top-1 size-2 rounded-full ring-1 ring-[var(--surface-gray-1)]"
+                  :class="isFlashingNotification ? 'bg-[var(--pc-lime)] animate-ping' : 'bg-surface-gray-9'"
                 />
               </span>
             </template>
             <!-- Not in #suffix: that slot sits outside the button, so a click on
                  the count would not toggle the panel. -->
-            <span class="flex-1 truncate text-sm leading-tighter">
+            <span
+              class="flex-1 truncate text-sm leading-tighter transition-colors"
+              :class="isFlashingNotification ? 'font-bold text-[var(--pc-lime-dark)] dark:text-[var(--pc-lime)]' : ''"
+            >
               {{ __('Notifications') }}
             </span>
             <Badge
               v-if="unreadNotificationsCount"
-              class="mr-2"
+              class="mr-2 transition-all duration-300"
+              :class="isFlashingNotification ? '!bg-[var(--pc-lime)] !text-[#081726] !font-bold scale-110 shadow-sm' : ''"
               :label="unreadNotificationsCount"
               variant="subtle"
             />
@@ -119,6 +128,7 @@
               </div>
             </div>
             <button
+              v-if="!isCoordinator()"
               :title="__('Settings')"
               class="p-1 rounded-full text-[var(--pc-muted)] hover:text-[var(--pc-navy)] hover:bg-[var(--pc-surface-subtle)] transition"
               @click="showSettings = true"
@@ -173,7 +183,7 @@ import PinIcon from '@/components/Icons/PinIcon.vue'
 import UserDropdown from '@/components/UserDropdown.vue'
 import SquareAsterisk from '@/components/Icons/SquareAsterisk.vue'
 import WebsiteIcon from '@/components/Icons/WebsiteIcon.vue'
-import { getNavigationItems } from '@/utils/navigation'
+import { getNavigationItems, COORDINATOR_ALLOWED_ROUTES } from '@/utils/navigation'
 import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
 import DealsIcon from '@/components/Icons/DealsIcon.vue'
 import FileTextIcon from '@/components/Icons/FileTextIcon.vue'
@@ -188,6 +198,7 @@ import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
 import HelpIcon from '@/components/Icons/HelpIcon.vue'
 import Notifications from '@/components/Notifications.vue'
 import Settings from '@/components/Settings/Settings.vue'
+import { globalStore } from '@/stores/global'
 import { viewsStore } from '@/stores/views'
 import {
   unreadNotificationsCount,
@@ -217,7 +228,7 @@ import { useTelemetry } from '@framework/ui/telemetry'
 import router from '@/router'
 import { useStorage } from '@vueuse/core'
 import { useDemoData } from '@/composables/demoData'
-import { ref, reactive, computed, markRaw, onMounted, watch } from 'vue'
+import { ref, reactive, computed, markRaw, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 const props = defineProps({
@@ -226,6 +237,7 @@ const props = defineProps({
 
 const route = useRoute()
 
+const { $socket } = globalStore()
 const { getPinnedViews, getPublicViews } = viewsStore()
 const { toggle: toggleNotificationPanel } = notificationsStore()
 const { capture } = useTelemetry()
@@ -234,6 +246,39 @@ const { send } = useBroadcast()
 
 const isSidebarCollapsed = useStorage('isSidebarCollapsed', false)
 
+// Real-time flash notification trigger
+const isFlashingNotification = ref(false)
+let flashTimer = null
+
+function triggerNotificationFlash() {
+  isFlashingNotification.value = true
+  if (flashTimer) clearTimeout(flashTimer)
+  flashTimer = setTimeout(() => {
+    isFlashingNotification.value = false
+  }, 4500)
+}
+
+watch(unreadNotificationsCount, (newVal, oldVal) => {
+  if (Number(newVal) > Number(oldVal || 0)) {
+    triggerNotificationFlash()
+  }
+})
+
+onMounted(() => {
+  if ($socket) {
+    $socket.on('crm_notification', () => {
+      triggerNotificationFlash()
+    })
+  }
+})
+
+onBeforeUnmount(() => {
+  if (flashTimer) clearTimeout(flashTimer)
+  if ($socket) {
+    $socket.off('crm_notification')
+  }
+})
+
 // The mobile drawer pins the sidebar open, so it is never visually collapsed
 // even when the stored rail state says otherwise.
 const isCollapsed = computed(() => isSidebarCollapsed.value && !props.mobile)
@@ -241,7 +286,12 @@ const isCollapsed = computed(() => isSidebarCollapsed.value && !props.mobile)
 const isFCSite = ref(window.is_fc_site)
 const isDemoSite = ref(window.is_demo_site)
 
-const links = getNavigationItems({ mobile: props.mobile })
+const { users, isManager, isCoordinator, getUser, getUserRole } = usersStore()
+
+const links = computed(() => {
+  const role = getUserRole ? getUserRole() : null
+  return getNavigationItems({ mobile: props.mobile, role })
+})
 
 const allViews = computed(() => {
   let _views = [
@@ -249,7 +299,7 @@ const allViews = computed(() => {
       name: 'All Views',
       hideLabel: true,
       opened: true,
-      views: links.map((link) => ({
+      views: links.value.map((link) => ({
         label: link.label,
         icon: link.icon,
         key: link.route,
@@ -276,7 +326,11 @@ const allViews = computed(() => {
 })
 
 function parseView(views) {
-  return views.map((view) => {
+  let filtered = views
+  if (isCoordinator && isCoordinator()) {
+    filtered = views.filter((view) => COORDINATOR_ALLOWED_ROUTES.includes(view.route_name))
+  }
+  return filtered.map((view) => {
     return {
       label: view.label,
       icon: getIcon(view.route_name, view.icon),
@@ -350,6 +404,7 @@ watch(
 )
 
 function onNotificationsClick(event) {
+  isFlashingNotification.value = false
   if (props.mobile) {
     selectItem(event, 'Notifications')
   } else {
@@ -364,7 +419,6 @@ function toggleHelpModal() {
 
 // onboarding
 const { user } = sessionStore()
-const { users, isManager, getUser } = usersStore()
 const currentUser = computed(() => (getUser ? getUser(user) : {}) || {})
 const { isOnboardingStepsCompleted, setUp } = useOnboarding('frappecrm')
 
@@ -768,3 +822,29 @@ const articles = ref([
   },
 ])
 </script>
+
+<style scoped>
+@keyframes pc-notify-flash {
+  0%, 100% {
+    background-color: transparent;
+    box-shadow: none;
+    border-color: transparent;
+  }
+  20%, 60% {
+    background-color: rgba(154, 199, 44, 0.28);
+    box-shadow: 0 0 14px rgba(154, 199, 44, 0.45);
+    border-color: var(--pc-lime);
+  }
+  40%, 80% {
+    background-color: rgba(154, 199, 44, 0.12);
+    box-shadow: 0 0 6px rgba(154, 199, 44, 0.25);
+    border-color: rgba(154, 199, 44, 0.35);
+  }
+}
+
+:deep(#notifications-btn.notify-flash-pulse) {
+  animation: pc-notify-flash 2.2s ease-in-out infinite !important;
+  border-radius: 12px !important;
+  border: 1.5px solid var(--pc-lime) !important;
+}
+</style>
